@@ -192,6 +192,50 @@
     }
     .time-section input[type="time"]:focus { border-color: #e11d48; }
 
+    /* ── message box ── */
+    .message-section {
+      margin-top: 1.4rem;
+      text-align: left;
+    }
+    .message-section label {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--text-mid);
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      margin-bottom: .5rem;
+    }
+    .message-section textarea {
+      font-family: 'Poppins', sans-serif;
+      font-size: .9rem;
+      color: var(--text-dark);
+      border: 2px solid #f9a8d4;
+      border-radius: 1rem;
+      padding: .8rem 1rem;
+      background: rgba(255,255,255,.9);
+      outline: none;
+      width: 100%;
+      resize: none;
+      min-height: 100px;
+      line-height: 1.6;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .message-section textarea::placeholder {
+      color: #c4a0b8;
+      font-style: italic;
+    }
+    .message-section textarea:focus {
+      border-color: #e11d48;
+      box-shadow: 0 0 0 3px rgba(225,29,72,.1);
+    }
+    .char-count {
+      font-size: .75rem;
+      color: #c4a0b8;
+      text-align: right;
+      margin-top: .3rem;
+    }
+
     .btn-confirm {
       margin-top: 1.4rem;
       background: linear-gradient(135deg, #f472b6, #e11d48);
@@ -298,8 +342,22 @@
       <input type="time" id="time-input" value="19:00" />
     </div>
 
+    <!-- ── CAIXA DE MENSAGEM ── -->
+    <div class="message-section">
+      <label>
+        💌 Deixa uma mensagem para o João:
+      </label>
+      <textarea
+        id="personal-message"
+        maxlength="300"
+        placeholder="Escreva algo especial… ele vai receber junto com a confirmação 🥰"
+        oninput="updateCharCount()"
+      ></textarea>
+      <div class="char-count"><span id="char-count">0</span>/300</div>
+    </div>
+
     <br>
-    <button class="btn-confirm" id="btn-confirm" onclick="confirmTime()">Marcar horário</button>
+    <button class="btn-confirm" id="btn-confirm" onclick="confirmTime()">Marcar horário 💕</button>
     <div id="send-status"></div>
     <span class="back-link" onclick="goActivities()">← Mudar atividade</span>
   </div>
@@ -326,32 +384,35 @@ const DEST_EMAIL       = "joaobody27@gmail.com";
 
 let chosenActivity = "";
 
+/* ───────── CHAR COUNT ───────── */
+function updateCharCount() {
+  const val = document.getElementById('personal-message').value.length;
+  document.getElementById('char-count').textContent = val;
+}
+
 /* ───────── BOTÃO "NÃO" SO FOGE QUANDO TENTAM CLICAR/TOCAR ───────── */
 
 const btnNo = document.getElementById('btn-no');
 let noIsFixed = false;
 
 function moveButton() {
-  // na primeira fuga, converte de posição normal (lado a lado) para fixed
   if (!noIsFixed) {
     const r = btnNo.getBoundingClientRect();
     btnNo.classList.add('is-fixed');
     btnNo.style.left = r.left + 'px';
     btnNo.style.top = r.top + 'px';
-    // força o navegador a aplicar a posição inicial antes de animar
     btnNo.offsetHeight;
     noIsFixed = true;
   }
 
-  // some (poof)
   btnNo.classList.add('poof');
 
   setTimeout(() => {
     const bw = btnNo.offsetWidth || 100;
     const bh = btnNo.offsetHeight || 40;
 
-    const safeTop = 70;     // evita notch / status bar
-    const safeBottom = 90;  // evita home indicator / barra inferior
+    const safeTop = 70;
+    const safeBottom = 90;
 
     const maxX = Math.max(10, window.innerWidth - bw - 20);
     const maxY = Math.max(10, window.innerHeight - bh - safeBottom);
@@ -362,18 +423,15 @@ function moveButton() {
     btnNo.style.left = x + 'px';
     btnNo.style.top = y + 'px';
 
-    // reaparece
     btnNo.classList.remove('poof');
   }, 220);
 }
 
-// foge ao clicar
 btnNo.addEventListener('click', function(e) {
   e.preventDefault();
   moveButton();
 });
 
-// foge ao tocar (mobile)
 btnNo.addEventListener('touchstart', function(e) {
   e.preventDefault();
   moveButton();
@@ -405,6 +463,7 @@ function selectActivity(el, name) {
 
 async function confirmTime() {
   const timeVal = document.getElementById('time-input').value;
+  const personalMsg = document.getElementById('personal-message').value.trim();
 
   if (!timeVal) {
     alert('Escolha um horário!');
@@ -428,7 +487,8 @@ async function confirmTime() {
         activity: chosenActivity,
         time: display,
         date: new Date().toLocaleDateString('pt-BR'),
-        message: 'Marcado! ' + chosenActivity + ' às ' + display
+        message: 'Marcado! ' + chosenActivity + ' às ' + display,
+        personal_message: personalMsg || '(nenhuma mensagem deixada)'
       }
     );
   } catch(err) {
