@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Feliz Dia dos Namorados</title>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -51,10 +51,11 @@
       display: none;
       position: relative; z-index: 1;
       min-height: 100vh;
+      min-height: 100dvh;
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      padding: 2rem 1rem;
+      padding: calc(2rem + env(safe-area-inset-top)) 1rem calc(2rem + env(safe-area-inset-bottom));
       text-align: center;
     }
     .screen.active { display: flex; }
@@ -76,7 +77,7 @@
       font-size: clamp(1.8rem, 5vw, 2.8rem);
       color: var(--rose);
       line-height: 1.2;
-      margin-bottom: .5rem;
+      margin-bottom: 1.5rem;
     }
     h2 {
       font-family: 'Pacifico', cursive;
@@ -133,7 +134,13 @@
     /* quando o JS marca como "fugindo", passa a ser fixed na tela */
     #btn-no.is-fixed {
       position: fixed;
-      transition: none;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+
+    /* animação de "sumir e reaparecer" */
+    #btn-no.poof {
+      opacity: 0;
+      transform: scale(.4) rotate(25deg);
     }
 
     /* ── activity grid ── */
@@ -242,7 +249,6 @@
 <div class="screen active" id="screen-main">
   <div class="card">
     <h1>Aceita sair comigo?</h1>
-    <p class="subtitle">Hoje é Dia dos Namorados — dia perfeito pra isso</p>
     <div class="btn-row">
       <button class="btn btn-yes" onclick="goActivities()">SIM</button>
       <button class="btn" id="btn-no">NÃO</button>
@@ -256,26 +262,26 @@
     <h2>Que ótimo! O que você quer fazer?</h2>
     <p class="subtitle">Escolha a sua ideia favorita</p>
     <div class="activity-grid">
-      <button class="act-btn" onclick="selectActivity(this,'Cinema')">
-        Cinema
+      <button class="act-btn" onclick="selectActivity(this,'🎬 Cinema')">
+        🎬 Cinema
       </button>
-      <button class="act-btn" onclick="selectActivity(this,'Sushi')">
-        Sushi
+      <button class="act-btn" onclick="selectActivity(this,'🍣 Sushi')">
+        🍣 Sushi
       </button>
-      <button class="act-btn" onclick="selectActivity(this,'Hambúrguer')">
-        Hambúrguer
+      <button class="act-btn" onclick="selectActivity(this,'🍔 Hambúrguer')">
+        🍔 Hambúrguer
       </button>
-      <button class="act-btn" onclick="selectActivity(this,'Boliche')">
-        Boliche
+      <button class="act-btn" onclick="selectActivity(this,'🎳 Boliche')">
+        🎳 Boliche
       </button>
-      <button class="act-btn" onclick="selectActivity(this,'Praia')">
-        Praia
+      <button class="act-btn" onclick="selectActivity(this,'🏖️ Praia')">
+        🏖️ Praia
       </button>
-      <button class="act-btn" onclick="selectActivity(this,'Comida Mexicana')">
-        Comida Mexicana
+      <button class="act-btn" onclick="selectActivity(this,'🌮 Comida Mexicana')">
+        🌮 Comida Mexicana
       </button>
-      <button class="act-btn" onclick="selectActivity(this,'Comida Italiana')">
-        Comida Italiana
+      <button class="act-btn" onclick="selectActivity(this,'🍕 Comida Italiana')">
+        🍕 Comida Italiana
       </button>
     </div>
   </div>
@@ -332,20 +338,33 @@ function moveButton() {
     btnNo.classList.add('is-fixed');
     btnNo.style.left = r.left + 'px';
     btnNo.style.top = r.top + 'px';
+    // força o navegador a aplicar a posição inicial antes de animar
+    btnNo.offsetHeight;
     noIsFixed = true;
   }
 
-  const bw = btnNo.offsetWidth || 100;
-  const bh = btnNo.offsetHeight || 40;
+  // some (poof)
+  btnNo.classList.add('poof');
 
-  const maxX = Math.max(10, window.innerWidth - bw - 20);
-  const maxY = Math.max(10, window.innerHeight - bh - 20);
+  setTimeout(() => {
+    const bw = btnNo.offsetWidth || 100;
+    const bh = btnNo.offsetHeight || 40;
 
-  const x = Math.random() * maxX;
-  const y = Math.random() * maxY;
+    const safeTop = 70;     // evita notch / status bar
+    const safeBottom = 90;  // evita home indicator / barra inferior
 
-  btnNo.style.left = x + 'px';
-  btnNo.style.top = y + 'px';
+    const maxX = Math.max(10, window.innerWidth - bw - 20);
+    const maxY = Math.max(10, window.innerHeight - bh - safeBottom);
+
+    const x = Math.random() * maxX;
+    const y = safeTop + Math.random() * Math.max(10, maxY - safeTop);
+
+    btnNo.style.left = x + 'px';
+    btnNo.style.top = y + 'px';
+
+    // reaparece
+    btnNo.classList.remove('poof');
+  }, 220);
 }
 
 // foge ao clicar
