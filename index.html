@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💕 Feliz Dia dos Namorados</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink-deep:   #f472b6;
+      --pink-mid:    #fb7bc8;
+      --pink-soft:   #fce7f3;
+      --pink-light:  #fdf2f8;
+      --rose:        #e11d48;
+      --cream:       #fff5f9;
+      --text-dark:   #4a1535;
+      --text-mid:    #7e3060;
+    }
+
+    html, body {
+      min-height: 100%;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #fce7f3 0%, #fdf2f8 40%, #fce7f3 100%);
+      color: var(--text-dark);
+      overflow-x: hidden;
+    }
+
+    /* ── floating hearts bg ── */
+    .hearts-bg {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .heart-float {
+      position: absolute;
+      bottom: -60px;
+      font-size: 1.4rem;
+      opacity: 0;
+      animation: floatUp linear infinite;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+      10%  { opacity: .6; }
+      90%  { opacity: .4; }
+      100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* ── screens ── */
+    .screen {
+      display: none;
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+    .screen.active { display: flex; }
+
+    /* ── card ── */
+    .card {
+      background: rgba(255,255,255,.75);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(244,114,182,.3);
+      border-radius: 2rem;
+      padding: 2.8rem 2.4rem;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 8px 40px rgba(225,29,72,.12);
+    }
+
+    h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      color: var(--rose);
+      line-height: 1.2;
+      margin-bottom: .5rem;
+    }
+    h2 {
+      font-family: 'Pacifico', cursive;
+      font-size: clamp(1.3rem, 4vw, 2rem);
+      color: var(--rose);
+      margin-bottom: 1rem;
+    }
+    .subtitle {
+      font-size: .95rem;
+      color: var(--text-mid);
+      margin-bottom: 2rem;
+    }
+
+    /* ── emoji big ── */
+    .emoji-big { font-size: 3.5rem; margin-bottom: 1rem; display: block; }
+
+    /* ── main question buttons ── */
+    .btn-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1.8rem;
+    }
+    .btn {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: .75rem 2rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      user-select: none;
+    }
+    .btn:active { transform: scale(.97); }
+
+    .btn-yes {
+      background: linear-gradient(135deg, #f472b6, #e11d48);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(225,29,72,.35);
+    }
+    .btn-yes:hover { transform: scale(1.07); box-shadow: 0 6px 24px rgba(225,29,72,.45); }
+
+    /* NÃO button – fixed position so JS can move it freely */
+    #btn-no {
+      position: fixed;
+      background: #e2e8f0;
+      color: #64748b;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      z-index: 9999;
+      transition: none; /* instant move */
+      pointer-events: auto;
+    }
+
+    /* ── activity grid ── */
+    .activity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: .8rem;
+      margin-top: 1.2rem;
+    }
+    .act-btn {
+      background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+      border: 1.5px solid #f9a8d4;
+      border-radius: 1rem;
+      padding: .8rem .6rem;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      transition: background .2s, transform .15s, box-shadow .15s;
+      display: flex; flex-direction: column; align-items: center; gap: .3rem;
+    }
+    .act-btn:hover {
+      background: linear-gradient(135deg, #f9a8d4, #f472b6);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(244,114,182,.4);
+    }
+    .act-btn .act-icon { font-size: 1.6rem; }
+
+    /* ── time picker ── */
+    .time-section { margin-top: 1.4rem; }
+    .time-section label {
+      font-size: .9rem; font-weight: 600; color: var(--text-mid);
+      display: block; margin-bottom: .4rem;
+    }
+    .time-section input[type="time"] {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--rose);
+      border: 2px solid #f9a8d4;
+      border-radius: .8rem;
+      padding: .5rem 1.2rem;
+      background: #fff;
+      outline: none;
+      width: 100%;
+      max-width: 200px;
+    }
+    .time-section input[type="time"]:focus { border-color: #e11d48; }
+
+    .btn-confirm {
+      margin-top: 1.4rem;
+      background: linear-gradient(135deg, #f472b6, #e11d48);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: .8rem 2rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(225,29,72,.3);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-confirm:hover { transform: scale(1.05); }
+    .btn-confirm:disabled { opacity: .6; cursor: default; transform: none; }
+
+    /* ── success ── */
+    #screen-done .card { max-width: 440px; }
+    #screen-done h1 { font-size: clamp(1.5rem,4vw,2.4rem); }
+    .confetti-row { font-size: 2rem; letter-spacing: .3rem; margin: .6rem 0 1.2rem; }
+
+    /* ── selected highlight ── */
+    .act-btn.selected {
+      background: linear-gradient(135deg, #f9a8d4, #e11d48);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(225,29,72,.4);
+    }
+
+    /* ── back link ── */
+    .back-link {
+      margin-top: 1.2rem;
+      font-size: .8rem;
+      color: var(--text-mid);
+      cursor: pointer;
+      text-decoration: underline;
+      opacity: .7;
+    }
+    .back-link:hover { opacity: 1; }
+
+    /* status msg */
+    #send-status {
+      margin-top: .8rem;
+      font-size: .85rem;
+      color: var(--text-mid);
+      min-height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Floating hearts background -->
+<div class="hearts-bg" id="hearts-bg"></div>
+
+<!-- ═══════════════════════════════ SCREEN 1 – PERGUNTA ═══════════════════════════════ -->
+<div class="screen active" id="screen-main">
+  <div class="card">
+    <span class="emoji-big">💕</span>
+    <h1>Aceita sair comigo?</h1>
+    <p class="subtitle">Hoje é Dia dos Namorados — dia perfeito pra isso ✨</p>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="goActivities()">SIM 💖</button>
+    </div>
+  </div>
+</div>
+
+<!-- botão NÃO fora do card, fixo na tela -->
+<button class="btn" id="btn-no" onmouseenter="escapeNo(event)" ontouchstart="escapeNo(event)">NÃO 😢</button>
+
+<!-- ═══════════════════════════════ SCREEN 2 – ATIVIDADES ════════════════════════════ -->
+<div class="screen" id="screen-activities">
+  <div class="card">
+    <span class="emoji-big">🎉</span>
+    <h2>Que ótimo! O que você quer fazer?</h2>
+    <p class="subtitle">Escolha a sua ideia favorita</p>
+    <div class="activity-grid">
+      <button class="act-btn" onclick="selectActivity(this,'🎬 Cinema')">
+        <span class="act-icon">🎬</span>Cinema
+      </button>
+      <button class="act-btn" onclick="selectActivity(this,'🍣 Sushi')">
+        <span class="act-icon">🍣</span>Sushi
+      </button>
+      <button class="act-btn" onclick="selectActivity(this,'🍔 Hambúrguer')">
+        <span class="act-icon">🍔</span>Hambúrguer
+      </button>
+      <button class="act-btn" onclick="selectActivity(this,'🎳 Boliche')">
+        <span class="act-icon">🎳</span>Boliche
+      </button>
+      <button class="act-btn" onclick="selectActivity(this,'🏖️ Praia')">
+        <span class="act-icon">🏖️</span>Praia
+      </button>
+      <button class="act-btn" onclick="selectActivity(this,'🌮 Comida Mexicana')">
+        <span class="act-icon">🌮</span>Comida Mexicana
+      </button>
+      <button class="act-btn" onclick="selectActivity(this,'🍕 Comida Italiana')">
+        <span class="act-icon">🍕</span>Comida Italiana
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ SCREEN 3 – HORÁRIO ══════════════════════════════ -->
+<div class="screen" id="screen-time">
+  <div class="card">
+    <span class="emoji-big" id="time-icon">💫</span>
+    <h2 id="time-title">Que hora?</h2>
+    <p class="subtitle">Dia dos Namorados — 12 de junho 💘</p>
+
+    <div class="time-section">
+      <label>Escolha o horário:</label>
+      <input type="time" id="time-input" value="19:00" />
+    </div>
+
+    <br>
+    <button class="btn-confirm" id="btn-confirm" onclick="confirmTime()">Marcar horário 💌</button>
+    <div id="send-status"></div>
+    <span class="back-link" onclick="goActivities()">← Mudar atividade</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ SCREEN 4 – CONFIRMADO ════════════════════════════ -->
+<div class="screen" id="screen-done">
+  <div class="card">
+    <div class="confetti-row">🎊💕🎊</div>
+    <h1>Tá marcado!</h1>
+    <p class="subtitle" id="done-msg"></p>
+    <p style="margin-top:1rem;font-size:.9rem;color:var(--text-mid);">
+      Já enviei a confirmação no e-mail dele 💌<br>
+      Vai ser incrível! ✨
+    </p>
+    <div class="confetti-row" style="margin-top:1.2rem;">💖🌹💖</div>
+  </div>
+</div>
+
+<script>
+  /* ── EmailJS init ── */
+  // Public key do EmailJS (gratuito – crie em emailjs.com e substitua)
+  emailjs.init({ publicKey: "-WqGPMWEPsVXoiQ2u" });
+
+  const EMAILJS_SERVICE  = "service_lx7c7dk";
+  const EMAILJS_TEMPLATE = "template_zs6oju6";
+  const DEST_EMAIL       = "joaobody27@gmail.com";
+
+  /* ── state ── */
+  let chosenActivity = "";
+  let chosenIcon     = "💫";
+
+  /* ─── Floating hearts ─── */
+  const heartsEl = document.getElementById('hearts-bg');
+  const EMOJIS = ['💕','💗','💖','🌸','✨','💓','🌷'];
+  for (let i = 0; i < 18; i++) {
+    const h = document.createElement('span');
+    h.classList.add('heart-float');
+    h.textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+    h.style.left     = Math.random() * 100 + 'vw';
+    h.style.fontSize = (1 + Math.random() * 1.4) + 'rem';
+    const dur = 6 + Math.random() * 8;
+    h.style.animationDuration = dur + 's';
+    h.style.animationDelay   = -(Math.random() * dur) + 's';
+    heartsEl.appendChild(h);
+  }
+
+  /* ─── Position "NÃO" button initially ─── */
+  const btnNo = document.getElementById('btn-no');
+  let noX = window.innerWidth  * 0.62;
+  let noY = window.innerHeight * 0.58;
+
+  function placeNo(x, y) {
+    const bw = btnNo.offsetWidth  || 100;
+    const bh = btnNo.offsetHeight || 44;
+    noX = Math.min(Math.max(x, 0), window.innerWidth  - bw);
+    noY = Math.min(Math.max(y, 0), window.innerHeight - bh);
+    btnNo.style.left = noX + 'px';
+    btnNo.style.top  = noY + 'px';
+  }
+
+  placeNo(noX, noY);
+
+  /* ─── Escape logic ─── */
+  function escapeNo(e) {
+    const margin = 120;
+    const bw = btnNo.offsetWidth;
+    const bh = btnNo.offsetHeight;
+
+    // Current cursor / touch position
+    let cx, cy;
+    if (e.touches) {
+      cx = e.touches[0].clientX;
+      cy = e.touches[0].clientY;
+    } else {
+      cx = e.clientX;
+      cy = e.clientY;
+    }
+
+    // Push away from cursor
+    let dx = noX - cx;
+    let dy = noY - cy;
+    const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+    dx /= dist; dy /= dist;
+
+    let newX = noX + dx * margin + (Math.random()-0.5)*60;
+    let newY = noY + dy * margin + (Math.random()-0.5)*60;
+
+    // Keep inside viewport
+    newX = Math.min(Math.max(newX, 0), window.innerWidth  - bw - 10);
+    newY = Math.min(Math.max(newY, 0), window.innerHeight - bh - 10);
+
+    placeNo(newX, newY);
+  }
+
+  /* ─── Screens ─── */
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function goActivities() {
+    btnNo.style.display = 'none'; // hide NÃO after SIM
+    showScreen('screen-activities');
+  }
+
+  function selectActivity(el, name) {
+    document.querySelectorAll('.act-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    chosenActivity = name;
+    chosenIcon     = el.querySelector('.act-icon').textContent;
+
+    // small delay then go to time screen
+    setTimeout(() => {
+      document.getElementById('time-icon').textContent  = chosenIcon;
+      document.getElementById('time-title').textContent = `${name} — que horas?`;
+      showScreen('screen-time');
+    }, 350);
+  }
+
+  async function confirmTime() {
+    const timeVal = document.getElementById('time-input').value;
+    if (!timeVal) { alert('Por favor, escolha um horário!'); return; }
+
+    const [h, m] = timeVal.split(':');
+    const period = +h >= 12 ? 'PM' : 'AM';
+    const h12    = +h > 12 ? +h - 12 : (+h === 0 ? 12 : +h);
+    const display = `${h12}:${m} ${period}`;
+
+    const btn = document.getElementById('btn-confirm');
+    const status = document.getElementById('send-status');
+    btn.disabled = true;
+    btn.textContent = 'Enviando... 💌';
+    status.textContent = '';
+
+    // Try EmailJS
+    try {
+      await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+        to_email:  DEST_EMAIL,
+        activity:  chosenActivity,
+        time:      display,
+        date:      "12/06/2025 – Dia dos Namorados 💕",
+        message:   `Ela confirmou! Vão fazer: ${chosenActivity} às ${display} no Dia dos Namorados 💘`
+      });
+    } catch(err) {
+      // Even if email fails, continue to success screen
+      console.warn('EmailJS error (configure as chaves para funcionar):', err);
+    }
+
+    // show done screen
+    document.getElementById('done-msg').textContent =
+      `${chosenActivity} hoje às ${display} 💕`;
+    showScreen('screen-done');
+  }
+</script>
+</body>
+</html>
