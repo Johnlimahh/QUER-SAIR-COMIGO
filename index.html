@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>💕 Feliz Dia dos Namorados</title>
+  <title>Feliz Dia dos Namorados</title>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
@@ -121,15 +121,19 @@
     }
     .btn-yes:hover { transform: scale(1.07); box-shadow: 0 6px 24px rgba(225,29,72,.45); }
 
-    /* NÃO button – fixed position so JS can move it freely */
+    /* NÃO button – começa lado a lado com o SIM dentro do fluxo normal */
     #btn-no {
-      position: fixed;
       background: #e2e8f0;
       color: #64748b;
       box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      position: relative;
       z-index: 9999;
-      transition: none; /* instant move */
-      pointer-events: auto;
+    }
+
+    /* quando o JS marca como "fugindo", passa a ser fixed na tela */
+    #btn-no.is-fixed {
+      position: fixed;
+      transition: none;
     }
 
     /* ── activity grid ── */
@@ -237,45 +241,41 @@
 <!-- ═══════════════════════════════ SCREEN 1 – PERGUNTA ═══════════════════════════════ -->
 <div class="screen active" id="screen-main">
   <div class="card">
-    <span class="emoji-big">💕</span>
     <h1>Aceita sair comigo?</h1>
-    <p class="subtitle">Hoje é Dia dos Namorados — dia perfeito pra isso ✨</p>
+    <p class="subtitle">Hoje é Dia dos Namorados — dia perfeito pra isso</p>
     <div class="btn-row">
-      <button class="btn btn-yes" onclick="goActivities()">SIM 💖</button>
+      <button class="btn btn-yes" onclick="goActivities()">SIM</button>
+      <button class="btn" id="btn-no">NÃO</button>
     </div>
   </div>
 </div>
 
-<!-- botão NÃO fora do card, fixo na tela -->
-<button class="btn" id="btn-no" onmouseenter="escapeNo(event)" ontouchstart="escapeNo(event)">NÃO 😢</button>
-
 <!-- ═══════════════════════════════ SCREEN 2 – ATIVIDADES ════════════════════════════ -->
 <div class="screen" id="screen-activities">
   <div class="card">
-    <span class="emoji-big">🎉</span>
     <h2>Que ótimo! O que você quer fazer?</h2>
     <p class="subtitle">Escolha a sua ideia favorita</p>
     <div class="activity-grid">
-      <button class="act-btn" onclick="selectActivity(this,'🎬 Cinema')">
-        <span class="act-icon">🎬</span>Cinema
+      <button class="act-btn" onclick="selectActivity(this,'Cinema')">
+        Cinema
       </button>
-      <button class="act-btn" onclick="selectActivity(this,'🍣 Sushi')">
-        <span class="act-icon">🍣</span>Sushi
+      <button class="act-btn" onclick="selectActivity(this,'Sushi')">
+        Sushi
       </button>
-      <button class="act-btn" onclick="selectActivity(this,'🍔 Hambúrguer')">
-        <span class="act-icon">🍔</span>Hambúrguer
+      <button class="act-btn" onclick="selectActivity(this,'Hambúrguer')">
+        Hambúrguer
       </button>
-      <button class="act-btn" onclick="selectActivity(this,'🎳 Boliche')">
-        <span class="act-icon">🎳</span>Boliche
+      <button class="act-btn" onclick="selectActivity(this,'Boliche')">
+        Boliche
       </button>
-      <button class="act-btn" onclick="selectActivity(this,'🏖️ Praia')">
-        <span class="act-icon">🏖️</span>Praia
+      <button class="act-btn" onclick="selectActivity(this,'Praia')">
+        Praia
       </button>
-      <button class="act-btn" onclick="selectActivity(this,'🌮 Comida Mexicana')">
-        <span class="act-icon">🌮</span>Comida Mexicana
+      <button class="act-btn" onclick="selectActivity(this,'Comida Mexicana')">
+        Comida Mexicana
       </button>
-      <button class="act-btn" onclick="selectActivity(this,'🍕 Comida Italiana')">
-        <span class="act-icon">🍕</span>Comida Italiana
+      <button class="act-btn" onclick="selectActivity(this,'Comida Italiana')">
+        Comida Italiana
       </button>
     </div>
   </div>
@@ -284,9 +284,8 @@
 <!-- ═══════════════════════════════ SCREEN 3 – HORÁRIO ══════════════════════════════ -->
 <div class="screen" id="screen-time">
   <div class="card">
-    <span class="emoji-big" id="time-icon">💫</span>
     <h2 id="time-title">Que hora?</h2>
-    <p class="subtitle">Dia dos Namorados — 12 de junho 💘</p>
+    <p class="subtitle">Dia dos Namorados — 12 de junho</p>
 
     <div class="time-section">
       <label>Escolha o horário:</label>
@@ -294,7 +293,7 @@
     </div>
 
     <br>
-    <button class="btn-confirm" id="btn-confirm" onclick="confirmTime()">Marcar horário 💌</button>
+    <button class="btn-confirm" id="btn-confirm" onclick="confirmTime()">Marcar horário</button>
     <div id="send-status"></div>
     <span class="back-link" onclick="goActivities()">← Mudar atividade</span>
   </div>
@@ -303,153 +302,125 @@
 <!-- ═══════════════════════════════ SCREEN 4 – CONFIRMADO ════════════════════════════ -->
 <div class="screen" id="screen-done">
   <div class="card">
-    <div class="confetti-row">🎊💕🎊</div>
     <h1>Tá marcado!</h1>
     <p class="subtitle" id="done-msg"></p>
     <p style="margin-top:1rem;font-size:.9rem;color:var(--text-mid);">
-      Já enviei a confirmação no e-mail dele 💌<br>
-      Vai ser incrível! ✨
+      Já enviei a confirmação no e-mail dele.<br>
+      Vai ser incrível!
     </p>
-    <div class="confetti-row" style="margin-top:1.2rem;">💖🌹💖</div>
   </div>
 </div>
 
 <script>
-  /* ── EmailJS init ── */
-  // Public key do EmailJS (gratuito – crie em emailjs.com e substitua)
-  emailjs.init({ publicKey: "-WqGPMWEPsVXoiQ2u" });
+emailjs.init({ publicKey: "-WqGPMWEPsVXoiQ2u" });
 
-  const EMAILJS_SERVICE  = "service_lx7c7dk";
-  const EMAILJS_TEMPLATE = "template_zs6oju6";
-  const DEST_EMAIL       = "joaobody27@gmail.com";
+const EMAILJS_SERVICE  = "service_lx7c7dk";
+const EMAILJS_TEMPLATE = "template_zs6oju6";
+const DEST_EMAIL       = "joaobody27@gmail.com";
 
-  /* ── state ── */
-  let chosenActivity = "";
-  let chosenIcon     = "💫";
+let chosenActivity = "";
 
-  /* ─── Floating hearts ─── */
-  const heartsEl = document.getElementById('hearts-bg');
-  const EMOJIS = ['💕','💗','💖','🌸','✨','💓','🌷'];
-  for (let i = 0; i < 18; i++) {
-    const h = document.createElement('span');
-    h.classList.add('heart-float');
-    h.textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
-    h.style.left     = Math.random() * 100 + 'vw';
-    h.style.fontSize = (1 + Math.random() * 1.4) + 'rem';
-    const dur = 6 + Math.random() * 8;
-    h.style.animationDuration = dur + 's';
-    h.style.animationDelay   = -(Math.random() * dur) + 's';
-    heartsEl.appendChild(h);
+/* ───────── BOTÃO "NÃO" SO FOGE QUANDO TENTAM CLICAR/TOCAR ───────── */
+
+const btnNo = document.getElementById('btn-no');
+let noIsFixed = false;
+
+function moveButton() {
+  // na primeira fuga, converte de posição normal (lado a lado) para fixed
+  if (!noIsFixed) {
+    const r = btnNo.getBoundingClientRect();
+    btnNo.classList.add('is-fixed');
+    btnNo.style.left = r.left + 'px';
+    btnNo.style.top = r.top + 'px';
+    noIsFixed = true;
   }
 
-  /* ─── Position "NÃO" button initially ─── */
-  const btnNo = document.getElementById('btn-no');
-  let noX = window.innerWidth  * 0.62;
-  let noY = window.innerHeight * 0.58;
+  const bw = btnNo.offsetWidth || 100;
+  const bh = btnNo.offsetHeight || 40;
 
-  function placeNo(x, y) {
-    const bw = btnNo.offsetWidth  || 100;
-    const bh = btnNo.offsetHeight || 44;
-    noX = Math.min(Math.max(x, 0), window.innerWidth  - bw);
-    noY = Math.min(Math.max(y, 0), window.innerHeight - bh);
-    btnNo.style.left = noX + 'px';
-    btnNo.style.top  = noY + 'px';
+  const maxX = Math.max(10, window.innerWidth - bw - 20);
+  const maxY = Math.max(10, window.innerHeight - bh - 20);
+
+  const x = Math.random() * maxX;
+  const y = Math.random() * maxY;
+
+  btnNo.style.left = x + 'px';
+  btnNo.style.top = y + 'px';
+}
+
+// foge ao clicar
+btnNo.addEventListener('click', function(e) {
+  e.preventDefault();
+  moveButton();
+});
+
+// foge ao tocar (mobile)
+btnNo.addEventListener('touchstart', function(e) {
+  e.preventDefault();
+  moveButton();
+}, { passive: false });
+
+/* ───────── NAVEGAÇÃO ENTRE TELAS ───────── */
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goActivities() {
+  btnNo.style.display = 'none';
+  showScreen('screen-activities');
+}
+
+function selectActivity(el, name) {
+  document.querySelectorAll('.act-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  chosenActivity = name;
+
+  setTimeout(() => {
+    document.getElementById('time-title').textContent = name + ' — que hora?';
+    showScreen('screen-time');
+  }, 280);
+}
+
+async function confirmTime() {
+  const timeVal = document.getElementById('time-input').value;
+
+  if (!timeVal) {
+    alert('Escolha um horário!');
+    return;
   }
 
-  placeNo(noX, noY);
+  const [h, m] = timeVal.split(':');
+  const display = h + ':' + m;
 
-  /* ─── Escape logic ─── */
-  function escapeNo(e) {
-    const margin = 120;
-    const bw = btnNo.offsetWidth;
-    const bh = btnNo.offsetHeight;
+  const btn = document.getElementById('btn-confirm');
 
-    // Current cursor / touch position
-    let cx, cy;
-    if (e.touches) {
-      cx = e.touches[0].clientX;
-      cy = e.touches[0].clientY;
-    } else {
-      cx = e.clientX;
-      cy = e.clientY;
-    }
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
 
-    // Push away from cursor
-    let dx = noX - cx;
-    let dy = noY - cy;
-    const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-    dx /= dist; dy /= dist;
-
-    let newX = noX + dx * margin + (Math.random()-0.5)*60;
-    let newY = noY + dy * margin + (Math.random()-0.5)*60;
-
-    // Keep inside viewport
-    newX = Math.min(Math.max(newX, 0), window.innerWidth  - bw - 10);
-    newY = Math.min(Math.max(newY, 0), window.innerHeight - bh - 10);
-
-    placeNo(newX, newY);
+  try {
+    await emailjs.send(
+      EMAILJS_SERVICE,
+      EMAILJS_TEMPLATE,
+      {
+        to_email: DEST_EMAIL,
+        activity: chosenActivity,
+        time: display,
+        date: new Date().toLocaleDateString('pt-BR'),
+        message: 'Marcado! ' + chosenActivity + ' às ' + display
+      }
+    );
+  } catch(err) {
+    console.warn(err);
   }
 
-  /* ─── Screens ─── */
-  function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    window.scrollTo(0, 0);
-  }
+  document.getElementById('done-msg').textContent =
+    chosenActivity + ' às ' + display;
 
-  function goActivities() {
-    btnNo.style.display = 'none'; // hide NÃO after SIM
-    showScreen('screen-activities');
-  }
-
-  function selectActivity(el, name) {
-    document.querySelectorAll('.act-btn').forEach(b => b.classList.remove('selected'));
-    el.classList.add('selected');
-    chosenActivity = name;
-    chosenIcon     = el.querySelector('.act-icon').textContent;
-
-    // small delay then go to time screen
-    setTimeout(() => {
-      document.getElementById('time-icon').textContent  = chosenIcon;
-      document.getElementById('time-title').textContent = `${name} — que horas?`;
-      showScreen('screen-time');
-    }, 350);
-  }
-
-  async function confirmTime() {
-    const timeVal = document.getElementById('time-input').value;
-    if (!timeVal) { alert('Por favor, escolha um horário!'); return; }
-
-    const [h, m] = timeVal.split(':');
-    const period = +h >= 12 ? 'PM' : 'AM';
-    const h12    = +h > 12 ? +h - 12 : (+h === 0 ? 12 : +h);
-    const display = `${h12}:${m} ${period}`;
-
-    const btn = document.getElementById('btn-confirm');
-    const status = document.getElementById('send-status');
-    btn.disabled = true;
-    btn.textContent = 'Enviando... 💌';
-    status.textContent = '';
-
-    // Try EmailJS
-    try {
-      await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-        to_email:  DEST_EMAIL,
-        activity:  chosenActivity,
-        time:      display,
-        date:      "12/06/2025 – Dia dos Namorados 💕",
-        message:   `Ela confirmou! Vão fazer: ${chosenActivity} às ${display} no Dia dos Namorados 💘`
-      });
-    } catch(err) {
-      // Even if email fails, continue to success screen
-      console.warn('EmailJS error (configure as chaves para funcionar):', err);
-    }
-
-    // show done screen
-    document.getElementById('done-msg').textContent =
-      `${chosenActivity} hoje às ${display} 💕`;
-    showScreen('screen-done');
-  }
+  showScreen('screen-done');
+}
 </script>
 </body>
 </html>
